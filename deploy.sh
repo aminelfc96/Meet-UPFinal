@@ -32,32 +32,47 @@ print_error() {
 # Check if running as root
 check_root() {
     if [[ $EUID -eq 0 ]]; then
-        print_error "This script should not be run as root for security reasons"
-        exit 1
+        print_warning "Running as root is not recommended but allowed."
+        print_warning "Ensure you know what you are doing."
+        # No exit, just warning for VPS users who are often root
     fi
 }
 
-# Check if Docker is installed
+# Check if Docker is installed and determine compose command
 check_docker() {
     print_status "Checking Docker installation..."
+    
+    # Check for docker engine
     if ! command -v docker &> /dev/null; then
         print_error "Docker is not installed. Please install Docker first."
         echo "Visit: https://docs.docker.com/get-docker/"
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null; then
-        print_error "Docker Compose is not installed. Please install Docker Compose first."
+    # Determine Docker Compose command
+    if command -v docker-compose &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker-compose"
+        print_success "Found docker-compose (standalone)"
+    elif docker compose version &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker compose"
+        print_success "Found docker compose (plugin)"
+    else
+        print_error "Docker Compose is not installed (neither standalone nor plugin found)."
         echo "Visit: https://docs.docker.com/compose/install/"
         exit 1
     fi
     
-    print_success "Docker and Docker Compose are installed"
+    print_success "Docker configuration verified"
 }
 
 # Check if user is in docker group
 check_docker_permissions() {
     print_status "Checking Docker permissions..."
+    # Skip permission check if root
+    if [[ $EUID -eq 0 ]]; then
+        return
+    fi
+    
     if ! docker ps &> /dev/null; then
         print_error "Cannot run Docker commands. Add your user to the docker group:"
         echo "sudo usermod -aG docker \$USER"
@@ -119,7 +134,7 @@ setup_directories() {
 # Stop existing containers
 stop_existing() {
     print_status "Stopping existing containers..."
-    docker-compose down --remove-orphans 2>/dev/null || true
+    $DOCKER_COMPOSE_CMD down --remove-orphans 2>/dev/null || true
     print_success "Existing containers stopped"
 }
 
@@ -137,10 +152,10 @@ deploy_services() {
     fi
     
     # Build the application
-    docker-compose -f $COMPOSE_FILE build --no-cache
+    $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE build --no-cache
     
     # Start services
-    docker-compose -f $COMPOSE_FILE up -d
+    $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE up -d
     
     print_success "Services deployed using $COMPOSE_FILE"
 }
@@ -154,13 +169,13 @@ wait_for_services() {
     local attempt=0
     
     while [[ $attempt -lt $max_attempts ]]; do
-        if docker-compose ps webapp | grep -q "Up (healthy)"; then
+        if $DOCKER_COMPOSE_CMD ps webapp | grep -q "Up (healthy)"; then
             break
         fi
         
-        if docker-compose ps webapp | grep -q "Exit"; then
+        if $DOCKER_COMPOSE_CMD ps webapp | grep -q "Exit"; then
             print_error "WebApp container failed to start"
-            docker-compose logs webapp
+            $DOCKER_COMPOSE_CMD logs webapp
             exit 1
         fi
         
@@ -173,7 +188,7 @@ wait_for_services() {
     
     if [[ $attempt -eq $max_attempts ]]; then
         print_error "Services did not become ready in time"
-        docker-compose logs
+        $DOCKER_COMPOSE_CMD logs
         exit 1
     fi
     
@@ -184,11 +199,11 @@ wait_for_services() {
 show_status() {
     print_status "Deployment Status:"
     echo ""
-    docker-compose ps
+    $DOCKER_COMPOSE_CMD ps
     echo ""
     
-    # Get the IP address
-    local ip=$(curl -s ifconfig.me || echo "localhost")
+    # Get the IP address (Force IPv4)
+    local ip=$(curl -4 -s ifconfig.me || echo "localhost")
     
     print_success "Deployment completed successfully!"
     echo ""
@@ -197,10 +212,10 @@ show_status() {
     echo "  HTTP:  http://${ip} (redirects to HTTPS)"
     echo ""
     echo "Management commands:"
-    echo "  View logs:    docker-compose logs -f"
-    echo "  Stop:         docker-compose down"
-    echo "  Restart:      docker-compose restart"
-    echo "  Update:       ./deploy.sh"
+    echo "  View logs:    ./deploy.sh logs"
+    echo "  Stop:         ./deploy.sh stop"
+    echo "  Restart:      ./deploy.sh restart"
+    echo "  Update:       ./deploy.sh update"
     echo ""
 }
 
@@ -228,26 +243,42 @@ case "${1:-deploy}" in
         main
         ;;
     "stop")
+        # Ensure we have the command before trying to stop if run standalone
+        if [ -z "$DOCKER_COMPOSE_CMD" ]; then
+             if command -v docker-compose &> /dev/null; then DOCKER_COMPOSE_CMD="docker-compose"; else DOCKER_COMPOSE_CMD="docker compose"; fi
+        fi
         print_status "Stopping all services..."
-        docker-compose down
+        $DOCKER_COMPOSE_CMD down
         print_success "All services stopped"
         ;;
     "restart")
+        if [ -z "$DOCKER_COMPOSE_CMD" ]; then
+             if command -v docker-compose &> /dev/null; then DOCKER_COMPOSE_CMD="docker-compose"; else DOCKER_COMPOSE_CMD="docker compose"; fi
+        fi
         print_status "Restarting services..."
-        docker-compose restart
+        $DOCKER_COMPOSE_CMD restart
         print_success "Services restarted"
         ;;
     "logs")
-        docker-compose logs -f
+        if [ -z "$DOCKER_COMPOSE_CMD" ]; then
+             if command -v docker-compose &> /dev/null; then DOCKER_COMPOSE_CMD="docker-compose"; else DOCKER_COMPOSE_CMD="docker compose"; fi
+        fi
+        $DOCKER_COMPOSE_CMD logs -f
         ;;
     "status")
-        docker-compose ps
+        if [ -z "$DOCKER_COMPOSE_CMD" ]; then
+             if command -v docker-compose &> /dev/null; then DOCKER_COMPOSE_CMD="docker-compose"; else DOCKER_COMPOSE_CMD="docker compose"; fi
+        fi
+        $DOCKER_COMPOSE_CMD ps
         ;;
     "update")
+        if [ -z "$DOCKER_COMPOSE_CMD" ]; then
+             if command -v docker-compose &> /dev/null; then DOCKER_COMPOSE_CMD="docker-compose"; else DOCKER_COMPOSE_CMD="docker compose"; fi
+        fi
         print_status "Updating deployment..."
-        docker-compose down
-        docker-compose build --no-cache
-        docker-compose up -d
+        $DOCKER_COMPOSE_CMD down
+        $DOCKER_COMPOSE_CMD build --no-cache
+        $DOCKER_COMPOSE_CMD up -d
         print_success "Deployment updated"
         ;;
     "backup")
