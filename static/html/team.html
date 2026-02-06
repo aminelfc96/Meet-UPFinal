@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Chat</title>
+    <link rel="stylesheet" href="/static/css/team.css">
+</head>
+<body>
+    <div class="header">
+        <h1>Team Chat - <span id="team-id">{team_id}</span></h1>
+        <div class="header-actions">
+            <button id="members-btn" onclick="toggleMembersPanel()" class="header-btn" title="Team Members">👥 Members</button>
+            <button onclick="window.close()" class="close-window-btn">Close</button>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="chat-container">
+            <div id="messages" class="messages"></div>
+            <div class="input-area">
+                <input type="file" id="file-input" class="file-input" accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.mp3,.mp4,.avi" style="display: none;">
+                <button onclick="document.getElementById('file-input').click()" class="file-btn">📎 File</button>
+                <input type="text" id="message-input" class="message-input" placeholder="Type your message..." maxlength="1000">
+                <button onclick="sendMessage()" class="send-btn">Send</button>
+            </div>
+        </div>
+        
+        <div id="members-panel" class="members-panel hidden">
+            <div class="members-header">
+                <h3>Team Members</h3>
+                <button onclick="toggleMembersPanel()" class="close-panel-btn">✕</button>
+            </div>
+            <div id="members-list" class="members-list">
+                <div class="loading">Loading members...</div>
+            </div>
+            <div id="pending-requests-section" class="pending-section hidden">
+                <h4>Pending Join Requests</h4>
+                <div id="pending-list" class="pending-list">
+                    <div class="loading">Loading requests...</div>
+                </div>
+            </div>
+            <div id="admin-actions" class="admin-actions hidden">
+                <button onclick="clearTeamChat()" class="danger-btn">🗑️ Clear Chat</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/request-cache.js"></script>
+    <script src="/static/js/team.js"></script>
+</body>
+</html>

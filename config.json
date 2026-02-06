@@ -1,0 +1,127 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "debug": false,
+    "reload": false
+  },
+  "security": {
+    "secret_key": "2c4de987879f4ab84d071862641bb1190a339fd992f0d73828433d0b90e1e184",
+    "allowed_origins": [
+      "http://localhost:8000",
+      "https://localhost:8000",
+      "http://127.0.0.1:8000",
+      "https://127.0.0.1:8000"
+    ],
+    "csrf_protection": {
+      "enabled": false,
+      "token_expiry_hours": 1
+    },
+    "jwt": {
+      "access_token_expire_minutes": 60,
+      "refresh_token_expire_days": 7,
+      "algorithm": "HS256"
+    },
+    "rate_limiting": {
+      "enabled": true,
+      "auth_requests_per_minute": 5,
+      "api_requests_per_minute": 30,
+      "static_requests_per_minute": 60,
+      "max_strikes": 3,
+      "ban_duration_minutes": 30
+    },
+    "anti_bot": {
+      "enabled": true,
+      "strict_user_agent_check": true,
+      "block_automation_tools": true,
+      "require_browser_headers": true
+    },
+    "device_fingerprinting": {
+      "enabled": true,
+      "strict_validation": false
+    }
+  },
+  "features": {
+    "user_registration": true,
+    "team_creation": true,
+    "team_joining": true,
+    "meeting_creation": true,
+    "meeting_joining": true,
+    "file_upload": true,
+    "chat_functionality": true,
+    "secret_id_retrieval": true,
+    "account_deletion": true,
+    "admin_management": true,
+    "health_endpoint": true,
+    "metrics_endpoint": false
+  },
+  "validation": {
+    "password_min_length": 4,
+    "password_max_length": 128,
+    "username_min_length": 1,
+    "username_max_length": 50,
+    "team_name_max_length": 100,
+    "meeting_name_max_length": 100,
+    "message_max_length": 1000
+  },
+  "file_upload": {
+    "enabled": true,
+    "max_file_size_mb": 10,
+    "allowed_extensions": [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".gif",
+      ".pdf",
+      ".txt",
+      ".doc",
+      ".docx"
+    ],
+    "upload_directory": "uploads",
+    "scan_files": true
+  },
+  "database": {
+    "path": "meeting_app.db",
+    "backup_enabled": true,
+    "backup_interval_hours": 24,
+    "auto_vacuum": true
+  },
+  "logging": {
+    "level": "INFO",
+    "enable_file_logging": true,
+    "log_directory": "logs",
+    "max_log_file_size_mb": 50,
+    "backup_count": 5,
+    "log_security_events": true,
+    "log_api_requests": false
+  },
+  "websocket": {
+    "enabled": true,
+    "max_connections_per_room": 50,
+    "connection_timeout_seconds": 300,
+    "heartbeat_interval_seconds": 30
+  },
+  "session": {
+    "auto_logout_inactive_minutes": 1440,
+    "remember_device_days": 30,
+    "max_concurrent_sessions": 5
+  },
+  "ui": {
+    "show_public_ids": true,
+    "enable_dark_mode": true,
+    "show_user_count": true,
+    "enable_notifications": true,
+    "auto_refresh_interval_seconds": 30
+  },
+  "admin": {
+    "require_admin_approval_for_teams": false,
+    "require_admin_approval_for_meetings": false,
+    "enable_user_statistics": true
+  },
+  "performance": {
+    "enable_caching": true,
+    "cache_expiry_minutes": 15,
+    "enable_compression": true,
+    "max_request_size_mb": 50
+  }
+}

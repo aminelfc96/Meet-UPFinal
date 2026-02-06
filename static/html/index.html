@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting App</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Landing/Auth Page -->
+    <div id="auth-page" class="container">
+        <h1>Meeting App</h1>
+        
+        <div id="error-message" class="error hidden"></div>
+        <div id="success-message" class="success hidden"></div>
+        
+        <!-- Login Form -->
+        <form id="login-form" onsubmit="return false;">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label for="login-userid">User ID:</label>
+                <input type="text" id="login-userid" name="user_id" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password:</label>
+                <input type="password" id="login-password" name="password" required autocomplete="current-password">
+            </div>
+            <button type="button" class="btn" onclick="login()">Login</button>
+            <div class="auth-toggle">
+                Don't have an account? 
+                <button type="button" onclick="toggleAuth()">Register here</button>
+            </div>
+        </form>
+        
+        <!-- Register Form -->
+        <form id="register-form" class="hidden" onsubmit="return false;">
+            <h2>Register</h2>
+            <div class="form-group">
+                <label for="register-name">Name:</label>
+                <input type="text" id="register-name" name="name" required autocomplete="name">
+            </div>
+            <div class="form-group">
+                <label for="register-password">Password:</label>
+                <input type="password" id="register-password" name="password" required autocomplete="new-password">
+            </div>
+            <button type="button" class="btn" onclick="register()">Register</button>
+            <div class="auth-toggle">
+                Already have an account? 
+                <button type="button" onclick="toggleAuth()">Login here</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard hidden">
+        <div class="sidebar">
+            <div class="user-info">
+                <h3 id="user-name"></h3>
+                <p>Public ID: <span id="public-id"></span></p>
+                <button class="see-id-btn" onclick="showSecretIdModal()">View Login ID</button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+                <button class="delete-account-btn" onclick="confirmDeleteAccount()">Delete Account</button>
+            </div>
+            
+            <h3>My Teams</h3>
+            <div id="teams-list" class="teams-list">
+                <p>No teams joined yet</p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <h1>Welcome to Meeting App</h1>
+            <div class="action-buttons">
+                <div class="action-btn" onclick="showCreateTeamModal()">
+                    <h3>Create Team</h3>
+                    <p>Start a new team and invite members</p>
+                </div>
+                <div class="action-btn" onclick="showJoinTeamModal()">
+                    <h3>Join Team</h3>
+                    <p>Request to join an existing team</p>
+                </div>
+                <div class="action-btn" onclick="showCreateMeetingModal()">
+                    <h3>Create Meeting</h3>
+                    <p>Start a temporary meeting</p>
+                </div>
+                <div class="action-btn" onclick="showJoinMeetingModal()">
+                    <h3>Join Meeting</h3>
+                    <p>Join an existing meeting</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div id="create-team-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('create-team-modal')">&times;</button>
+            <h2>Create Team</h2>
+            <form onsubmit="return false;">
+                <div class="form-group">
+                    <label for="team-name">Team Name:</label>
+                    <input type="text" id="team-name" required>
+                </div>
+                <button type="button" class="btn" onclick="createTeam()">Create Team</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="join-team-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('join-team-modal')">&times;</button>
+            <h2>Join Team</h2>
+            <form onsubmit="return false;">
+                <div class="form-group">
+                    <label for="join-team-id">Team ID:</label>
+                    <input type="text" id="join-team-id" required>
+                </div>
+                <button type="button" class="btn" onclick="joinTeam()">Request to Join</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="create-meeting-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('create-meeting-modal')">&times;</button>
+            <h2>Create Meeting</h2>
+            <form onsubmit="return false;">
+                <div class="form-group">
+                    <label for="meeting-name">Meeting Name:</label>
+                    <input type="text" id="meeting-name" required>
+                </div>
+                <button type="button" class="btn" onclick="createMeeting()">Create Meeting</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="join-meeting-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('join-meeting-modal')">&times;</button>
+            <h2>Join Meeting</h2>
+            <form onsubmit="return false;">
+                <div class="form-group">
+                    <label for="join-meeting-id">Meeting ID:</label>
+                    <input type="text" id="join-meeting-id" required>
+                </div>
+                <button type="button" class="btn" onclick="joinMeeting()">Request to Join</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Secret ID Modal -->
+    <div id="secret-id-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeSecretIdModal()">&times;</button>
+            <h2>🔐 Retrieve Login ID</h2>
+            <p class="security-warning">⚠️ Your login ID is sensitive information. Do not share it with anyone.</p>
+            
+            <form id="secret-id-form" onsubmit="return false;">
+                <input type="text" style="display: none;" autocomplete="username">
+                <div class="form-group">
+                    <label for="secret-password">Enter your password to continue:</label>
+                    <input type="password" id="secret-password" required autocomplete="current-password" placeholder="Password">
+                </div>
+                <button type="button" class="btn" onclick="retrieveSecretId()">Retrieve Login ID</button>
+            </form>
+            
+            <div id="secret-id-result" class="secret-result hidden">
+                <div class="secret-box">
+                    <label>Your Login ID:</label>
+                    <div class="secret-display">
+                        <input type="text" id="secret-id-value" readonly>
+                        <button class="copy-btn" onclick="copySecretId()">📋 Copy</button>
+                    </div>
+                    <p class="auto-close-warning">⏱️ This window will close automatically in <span id="countdown">10</span> seconds</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/request-cache.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

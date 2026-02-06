@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+aiosqlite
+aiofiles
+cryptography
+python-multipart
+bleach
+python-magic
+pydantic[email]
+user-agents
+pyjwt[crypto]

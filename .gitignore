@@ -1,0 +1,7 @@
+uploads/
+logs/
+__pycache__/
+encryption.key
+meeting_app.db
+.claude/
+tofix.txt

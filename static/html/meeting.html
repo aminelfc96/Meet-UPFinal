@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting</title>
+    <link rel="stylesheet" href="/static/css/meeting.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📹%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+    <div class="header">
+        <h1>Meeting - <span id="meeting-id">{meeting_id}</span><button class="copy-btn meeting-copy-btn" onclick="copyMeetingId()" title="Copy Meeting ID">📋</button></h1>
+        <div class="header-controls">
+            <span id="participant-count">0 participants</span>
+            <span id="connection-status" class="connection-status">Connecting...</span>
+            <button id="delete-meeting-btn" class="delete-meeting-btn hidden" onclick="deleteMeeting()">Delete Meeting</button>
+        </div>
+    </div>
+    
+    <div class="meeting-container">
+        <!-- Pending Requests Panel (only visible to meeting creator) -->
+        <div id="pending-requests-panel" class="pending-requests hidden">
+            <div class="pending-header">
+                <h3>Pending Join Requests</h3>
+                <button onclick="togglePendingPanel()" class="collapse-btn">−</button>
+            </div>
+            <div id="pending-requests-list" class="pending-list">
+                <!-- Pending requests will be populated here -->
+            </div>
+        </div>
+        
+        <div class="video-meeting-area">
+            <div class="video-area" id="video-area">
+                <!-- Video tiles will be added dynamically -->
+            </div>
+            
+            <div class="chat-panel">
+                <div class="chat-header">
+                    <h3>Chat</h3>
+                    <div class="encryption-indicator">🔒 E2E Encrypted</div>
+                </div>
+                <div id="chat-messages" class="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="chat-input" class="message-input" placeholder="Type message..." maxlength="500">
+                    <button onclick="sendChatMessage()" class="send-btn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button id="mic-btn" class="control-btn mic-btn off" onclick="toggleMic()">MIC OFF</button>
+        <button id="camera-btn" class="control-btn camera-btn off" onclick="toggleCamera()">CAM OFF</button>
+        <button id="screen-btn" class="control-btn screen-btn" onclick="toggleScreen()">SHARE SCREEN</button>
+        <button class="control-btn settings-btn" onclick="showSettings()">SETTINGS</button>
+        <button class="control-btn leave-btn" onclick="leaveMeeting()">LEAVE</button>
+    </div>
+
+    <!-- GDPR Consent Modal -->
+    <div id="gdpr-modal" class="modal">
+        <div class="modal-content">
+            <h2>Privacy Consent</h2>
+            <div class="gdpr-content">
+                <p>This meeting application processes personal data including:</p>
+                <ul>
+                    <li>Audio and video streams during meetings</li>
+                    <li>Chat messages and shared files</li>
+                    <li>Meeting participation logs</li>
+                </ul>
+                <p>Data is encrypted end-to-end and deleted after 30 days. By continuing, you consent to this processing.</p>
+                <div class="gdpr-actions">
+                    <button onclick="acceptGDPR()" class="btn">Accept & Continue</button>
+                    <button onclick="rejectGDPR()" class="btn-secondary">Decline</button>
+                </div>
+                <a href="/privacy-policy" target="_blank">View Privacy Policy</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeSettings()">&times;</button>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <label>Video Quality:</label>
+                    <select id="video-quality" onchange="changeVideoQuality()">
+                        <option value="low">Low (360p)</option>
+                        <option value="medium" selected>Medium (720p)</option>
+                        <option value="high">High (1080p)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Audio Input:</label>
+                    <select id="audio-input"></select>
+                </div>
+                <div class="setting-group">
+                    <label>Video Input:</label>
+                    <select id="video-input"></select>
+                </div>
+                <div class="setting-group">
+                    <label>Bandwidth Limit:</label>
+                    <select id="bandwidth-limit" onchange="changeBandwidthLimit()">
+                        <option value="unlimited">Unlimited</option>
+                        <option value="high">High (2 Mbps)</option>
+                        <option value="medium" selected>Medium (1 Mbps)</option>
+                        <option value="low">Low (500 Kbps)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/meeting.js"></script>
+</body>
+</html>

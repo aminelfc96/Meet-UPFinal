@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  webapp:
+    build: .
+    container_name: webapp-prod
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persistent storage for database and uploads
+      - webapp_data:/app/data
+      - webapp_uploads:/app/uploads
+      - webapp_logs:/app/logs
+      # SSL certificates (mount your certs here)
+      - ./ssl:/app/ssl:ro
+    environment:
+      - ENV=production
+      - DATABASE_PATH=/app/data/meeting_app.db
+      - SSL_CERT_PATH=/app/ssl/cert.pem
+      - SSL_KEY_PATH=/app/ssl/key.pem
+      - ENCRYPTION_KEY_FILE=/app/data/encryption.key
+    networks:
+      - webapp-network
+    depends_on:
+      - nginx
+
+  nginx:
+    image: nginx:alpine
+    container_name: webapp-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/certs:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - webapp-network
+    depends_on:
+      - webapp
+
+volumes:
+  webapp_data:
+    driver: local
+  webapp_uploads:
+    driver: local
+  webapp_logs:
+    driver: local
+  nginx_logs:
+    driver: local
+
+networks:
+  webapp-network:
+    driver: bridge
