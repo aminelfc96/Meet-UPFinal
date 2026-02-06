@@ -10,8 +10,8 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - DOMAIN=${DOMAIN}
       - SERVER_IP=${SERVER_IP}
-    ports:
-      - "8000:8000"
+    # ports:
+    #   - "8000:8000" # Removed to avoid host conflicts, accessed via Nginx
     volumes:
       - ./data:/app/data
       - ./uploads:/app/uploads
