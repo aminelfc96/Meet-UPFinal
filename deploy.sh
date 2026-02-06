@@ -142,8 +142,8 @@ stop_existing() {
 deploy_services() {
     print_status "Building and starting services..."
     
-    # Check if production environment
-    if [ -f "docker-compose.prod.yml" ] && [ "${ENVIRONMENT:-}" = "production" ]; then
+    # Check if production environment or if prod file simply exists (default to prod for VPS)
+    if [ -f "docker-compose.prod.yml" ]; then
         print_status "Using production configuration..."
         COMPOSE_FILE="docker-compose.prod.yml"
     else

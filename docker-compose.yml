@@ -22,16 +22,14 @@ services:
       - ENCRYPTION_KEY_FILE=/app/data/encryption.key
     networks:
       - webapp-network
-    depends_on:
-      - nginx
+    # Removed circular dependency on nginx
 
   nginx:
     image: nginx:alpine
     container_name: webapp-nginx
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "5555:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/ssl/certs:ro
